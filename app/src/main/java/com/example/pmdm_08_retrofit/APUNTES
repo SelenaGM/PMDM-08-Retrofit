@@ -1,0 +1,6 @@
+Para que nuestra aplicación pueda entrar a internet tiene que tener en el manifest:
+
+   <uses-permission android:name="android.permission.INTERNET"/>
+
+
+Para poder montar las clases de la api, nos instalamos en preferences -> pluggins el RoboPOJOGenerator
