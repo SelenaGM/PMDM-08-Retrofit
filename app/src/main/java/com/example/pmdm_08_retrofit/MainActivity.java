@@ -1,14 +1,17 @@
 package com.example.pmdm_08_retrofit;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 
@@ -59,13 +62,60 @@ public class MainActivity extends AppCompatActivity {
 
         doGetAlbums();
 
+
+
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                insertarAlbum().show();
 
             }
         });
+    }
+
+    private AlertDialog insertarAlbum() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Crear album");
+        EditText txtTitulo = new EditText(this);
+        builder.setView(txtTitulo);
+        builder.setCancelable(false);
+        builder.setNegativeButton("CANCELAR", null);
+        builder.setPositiveButton("INSERTAR", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(!txtTitulo.getText().toString().isEmpty()){
+                    Album a = new Album();
+                    a.setUserId(1);
+                    a.setTitulo(txtTitulo.getText().toString());
+                    doPostAlbum(a);
+                }
+
+            }
+        });
+
+        return builder.create();
+    }
+
+    private void doPostAlbum(Album album) {
+        Retrofit retrofit = RetrofitObject.getConexion();
+        ApiConexiones api = retrofit.create(ApiConexiones.class);
+        Call<Album> postAlbum = api.postAlbum(album);
+
+        postAlbum.enqueue(new Callback<Album>() {
+            @Override
+            public void onResponse(Call<Album> call, Response<Album> response) {
+                if(response.code() == HttpsURLConnection.HTTP_CREATED){
+                    albums.add(0, response.body()); //insertamos el que nos devuelve la api en el body del response
+                    adapter.notifyItemInserted(0);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Album> call, Throwable t) {
+
+            }
+        });
+
     }
 
     private void doGetAlbums() {
